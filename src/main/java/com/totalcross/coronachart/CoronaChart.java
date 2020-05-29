@@ -23,12 +23,10 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
     @Override
     public void onPaint(Graphics g) {
         final int borderGap = 10;
-        // TODO Auto-generated method stub
         super.onPaint(g);
 
         g.foreColor = Color.interpolateA(0x869699, this.backColor, 65);
-        g.backColor = this.backColor;
-        Rect r = new Rect(x + borderGap, y + borderGap, width - (borderGap * 2), height - (borderGap * 2));
+        Rect r = new Rect(borderGap, borderGap, width - (borderGap * 2), height - (borderGap * 2));
         g.drawRoundRect(r.x, r.y, r.width, r.height, 10);
 
         for (Series<X, Y> series2 : series) {
@@ -113,6 +111,25 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                 }
                 g.foreColor = series2.color;
                 g.drawDots(r.x + 1, yPoints[yPoints.length - 1], widthX, yPoints[yPoints.length - 1]);
+                g.drawPolyline(xPoints, yPoints, nPoints);
+
+                // paint more pixels around to make the line thicker
+                for (int i = 0; i < nPoints; i++) {
+                    xPoints[i] += 1;
+                }
+                g.drawPolyline(xPoints, yPoints, nPoints);
+                for (int i = 0; i < nPoints; i++) {
+                    xPoints[i] -= 2;
+                }
+                g.drawPolyline(xPoints, yPoints, nPoints);
+                for (int i = 0; i < nPoints; i++) {
+                    xPoints[i] += 1;
+                    yPoints[i] += 1;
+                }
+                g.drawPolyline(xPoints, yPoints, nPoints);
+                for (int i = 0; i < nPoints; i++) {
+                    yPoints[i] -= 2;
+                }
                 g.drawPolyline(xPoints, yPoints, nPoints);
             }
         }

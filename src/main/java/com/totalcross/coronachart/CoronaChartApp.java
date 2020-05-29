@@ -13,7 +13,9 @@ import totalcross.json.JSONObject;
 import totalcross.sys.Convert;
 import totalcross.sys.Settings;
 import totalcross.sys.Vm;
+import totalcross.ui.Label;
 import totalcross.ui.MainWindow;
+import totalcross.ui.font.Font;
 import totalcross.ui.gfx.Color;
 import totalcross.util.Date;
 
@@ -26,6 +28,11 @@ public class CoronaChartApp extends MainWindow {
     @Override
     public void initUI() {
         this.backColor = 0x131722;
+        Label lblTitle = new Label("Coronavirus (COVID-19) charts and stats", CENTER);
+        lblTitle.setForeColor(Color.WHITE);
+        lblTitle.setFont(Font.getFont(true, 36));
+        add(lblTitle, LEFT, TOP + this.fmH, FILL, PREFERRED);
+
         try {
             JSONObject response = new JSONObject(new String(Vm.getFile("request.json")));
             JSONObject data = response.getJSONObject("data");
@@ -77,7 +84,7 @@ public class CoronaChartApp extends MainWindow {
             deathsSeries.title = "Deaths";
             deathsSeries.color = Color.WHITE;
             CoronaChart<MyDate, Integer> cc = new CoronaChart<>(confirmedSeries, recoveredSeries, deathsSeries);
-            add(cc, LEFT, TOP, FILL, FILL);
+            add(cc, LEFT, AFTER + this.fmH, FILL, FILL);
         } catch (/* IOException | */JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

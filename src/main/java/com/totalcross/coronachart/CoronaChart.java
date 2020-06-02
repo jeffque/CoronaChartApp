@@ -4,6 +4,7 @@ import java.util.List;
 
 import totalcross.sys.Convert;
 import totalcross.ui.Control;
+import totalcross.ui.Window;
 import totalcross.ui.gfx.Color;
 import totalcross.ui.gfx.Graphics;
 import totalcross.ui.gfx.Rect;
@@ -51,7 +52,7 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
 
                     g.foreColor = 0xc5cbce;
                     g.drawLine(r.width - 1 - yTextLen, yPos, r.width - 1 - yTextLen - yGap, yPos);
-                    g.drawText(s, r.width - 1 - yTextLen, yPos - this.fmH / 2);
+                    g.drawText(Convert.toCurrencyString(s, 0), r.width - 1 - yTextLen, yPos - this.fmH / 2);
                 }
                 g.foreColor = 0xc5cbce;
                 g.drawLine(r.width - 1 - yTextLen - yGap, r.y + 1, r.width - 1 - yTextLen - yGap,
@@ -62,7 +63,7 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                         r.height - xTextHeight - 1);
                 int widthX = r.width - 1 - yTextLen - yGap;
                 int part = widthX / nPoints;
-                int part2 = widthX / (nPoints / 2);
+                // int part2 = widthX / (nPoints / 2);
                 int xPos = r.x + 1;
                 int l2 = (int) (Math.log10(nPoints) / Math.log10(2));
                 // part = widthX;
@@ -88,7 +89,7 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
 
                     // x
                     xPos = r.x + 1 + i * part;
-                    // if (i % 9 == 0) {
+                    // if (i % 9 == 0) { 
 
                     String s = series.x.toString();
                     if (s != null) {
@@ -133,7 +134,6 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                 g.drawPolyline(xPoints, yPoints, nPoints);
             }
         }
-
         for (int i = 0; i < series.length; i++) {
             Series<X, Y> series2 = series[i];
             g.foreColor = Color.WHITE;
@@ -143,6 +143,11 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
             g.drawText(Convert.toCurrencyString(series2.data.get(series2.data.size() - 1).y.toString(), 0),
                     r.x + 15 + this.fm.stringWidth(texto), r.y + 6 + (i * this.fmH));
         }
+    }
+
+    public void changeSeries(Series<X, Y>... series) {
+        this.series = series;
+        Window.needsPaint = true;
     }
 
     public static class Series<X extends Comparable<X>, Y extends Number> {

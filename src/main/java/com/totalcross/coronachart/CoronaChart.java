@@ -65,7 +65,7 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                 int part = widthX / nPoints;
                 // int part2 = widthX / (nPoints / 2);
                 int xPos = r.x + 1;
-                int l2 = (int) (Math.log10(nPoints) / Math.log10(2));
+                //int l2 = (int) (Math.log10(nPoints) / Math.log10(2));
                 // part = widthX;
                 // try {
                 // for (int i = 0; i < l2; i++) {

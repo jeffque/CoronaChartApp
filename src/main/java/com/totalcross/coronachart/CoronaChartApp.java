@@ -94,10 +94,7 @@ public class CoronaChartApp extends MainWindow {
         Button btnStartStop = new Button("Start");
         btnStartStop.addPressListener(e -> {
             if(btnStartStop.getText().equals("Start")) {
-                index = 0;
-                currentAnimationTime = 0;
-                nextStopTime = 0;
-                MainWindow.getMainWindow().addUpdateListener(updateListener);
+                restartAnimation();
                 btnStartStop.setText("Stop");
             } else {
                 MainWindow.getMainWindow().removeUpdateListener(updateListener);

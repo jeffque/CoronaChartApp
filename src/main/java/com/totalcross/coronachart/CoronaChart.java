@@ -136,12 +136,14 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
         }
         for (int i = 0; i < series.length; i++) {
             Series<X, Y> series2 = series[i];
-            g.foreColor = Color.WHITE;
-            String texto = series2.title;
-            g.drawText(texto, r.x + 10, r.y + 6 + (i * this.fmH));
-            g.foreColor = series2.color;
-            g.drawText(Convert.toCurrencyString(series2.data.get(series2.data.size() - 1).y.toString(), 0),
-                    r.x + 15 + this.fm.stringWidth(texto), r.y + 6 + (i * this.fmH));
+            if(series2.data.size() > 0) {
+                g.foreColor = Color.WHITE;
+                String texto = series2.title;
+                g.drawText(texto, r.x + 10, r.y + 6 + (i * this.fmH));
+                g.foreColor = series2.color;
+                g.drawText(Convert.toCurrencyString(series2.data.get(series2.data.size() - 1).y.toString(), 0),
+                        r.x + 15 + this.fm.stringWidth(texto), r.y + 6 + (i * this.fmH));
+            }
         }
     }
 

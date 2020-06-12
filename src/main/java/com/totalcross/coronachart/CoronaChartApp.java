@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.totalcross.coronachart.CoronaChart.Data;
+import com.totalcross.coronachart.util.Colors;
 
 import totalcross.io.ByteArrayStream;
 import totalcross.io.IOException;
@@ -53,6 +54,7 @@ public class CoronaChartApp extends MainWindow {
 
         @Override
         public void updateListenerTriggered(int elapsedMilliseconds) {
+            //Calculates when to update the screen for the animation
             if (currentAnimationTime != 0) {
                 currentAnimationTime += elapsedMilliseconds;
             } else {
@@ -84,19 +86,23 @@ public class CoronaChartApp extends MainWindow {
             }
         }
     };
-
+    
     public CoronaChartApp() {
         setUIStyle(Settings.MATERIAL_UI);
+        //Filling the lists with confirmed, recovered and death cases   
+        fillData();
     }
 
     @Override
     public void initUI() {
         this.backColor = 0x131722;
+        //Adding components do UI
         Label lblTitle = new Label("Coronavirus (COVID-19) charts and stats", CENTER);
         lblTitle.setForeColor(Color.WHITE);
         lblTitle.setFont(Font.getFont(true, 36));
         add(lblTitle, LEFT, TOP + this.fmH, FILL, PREFERRED);
         Button btnStartStop = new Button("Start");
+        //Adding the listener to start or stop the animation
         btnStartStop.addPressListener(e -> {
             if (btnStartStop.getText().equals("Start")) {
                 restartAnimation();
@@ -129,65 +135,71 @@ public class CoronaChartApp extends MainWindow {
         add(btnDay, BEFORE - this.fmH, SAME);
 
         try {
-            String request = getCoronavirusData("https://coronavirus-map.p.rapidapi.com/v1/summary/latest", HttpStream.GET);
-            response = new JSONObject(request);
-            JSONObject data = response.getJSONObject("data");
-            dates = data.names();
-            array = data.toJSONArray(dates);
-            for (int i = 0; i < array.length(); i++) {
-                date = dates.getString(i);
-                item = array.getJSONObject(i);
-                MyDate myDate = new MyDate(Integer.parseInt(Convert.remove(date, "-")));
-                confirmedList.add(new Data<MyDate, Integer>(myDate, item.getInt("total_cases")));
-                recoveredList.add(new Data<MyDate, Integer>(myDate, item.getInt("recovered")));
-                deathsList.add(new Data<MyDate, Integer>(myDate, item.getInt("deaths")));
-            }
-
-            Collections.sort(confirmedList, new Comparator<Data<MyDate, Integer>>() {
-
-                @Override
-                public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                    return o1.x.compareTo(o2.x);
-                }
-            });
-            Collections.sort(recoveredList, new Comparator<Data<MyDate, Integer>>() {
-
-                @Override
-                public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                    return o1.x.compareTo(o2.x);
-                }
-            });
-            Collections.sort(deathsList, new Comparator<Data<MyDate, Integer>>() {
-
-                @Override
-                public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                    return o1.x.compareTo(o2.x);
-                }
-            });
+            //Setting the first CoronaChart
             MyDate.firstDay = confirmedList.get(0).x.toDate();
             confirmed.add(confirmedList.get(index));
             recovered.add(recoveredList.get(index));
             deaths.add(deathsList.get(index));
             confirmedSeries = new CoronaChart.Series<>(confirmed);
             confirmedSeries.title = "Confirmed";
-            confirmedSeries.color = 0xf44336;
+            confirmedSeries.color = Colors.COLOR_CONFIRMED_CASES;
             recoveredSeries = new CoronaChart.Series<>(recovered);
             recoveredSeries.title = "Recovered";
-            recoveredSeries.color = 0x009688;
+            recoveredSeries.color = Colors.COLOR_RECOVERED_CASES;
             deathsSeries = new CoronaChart.Series<>(deaths);
             deathsSeries.title = "Deaths";
-            deathsSeries.color = Color.WHITE;
+            deathsSeries.color = Colors.COLOR_DEATH_CASES;
             cc = new CoronaChart<>(confirmedSeries, recoveredSeries, deathsSeries);
             add(cc, LEFT, AFTER + this.fmH, FILL, FILL);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (Exception e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }
 
-    public void restartAnimation() {
+    private void fillData() {
+        //Getting the information and filling the lists used to fill the CoronaChart
+        String request = getCoronavirusData("https://coronavirus-map.p.rapidapi.com/v1/summary/latest", HttpStream.GET);
+        response = new JSONObject(request);
+        JSONObject data = response.getJSONObject("data");
+        dates = data.names();
+        array = data.toJSONArray(dates);
+        for (int i = 0; i < array.length(); i++) {
+            date = dates.getString(i);
+            item = array.getJSONObject(i);
+            MyDate myDate = new MyDate(Integer.parseInt(Convert.remove(date, "-")));
+            confirmedList.add(new Data<MyDate, Integer>(myDate, item.getInt("total_cases")));
+            recoveredList.add(new Data<MyDate, Integer>(myDate, item.getInt("recovered")));
+            deathsList.add(new Data<MyDate, Integer>(myDate, item.getInt("deaths")));
+        }
+
+        //Sorts the data by date;
+        Collections.sort(confirmedList, new Comparator<Data<MyDate, Integer>>() {
+
+            @Override
+            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
+                return o1.x.compareTo(o2.x);
+            }
+        });
+        Collections.sort(recoveredList, new Comparator<Data<MyDate, Integer>>() {
+
+            @Override
+            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
+                return o1.x.compareTo(o2.x);
+            }
+        });
+        Collections.sort(deathsList, new Comparator<Data<MyDate, Integer>>() {
+
+            @Override
+            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
+                return o1.x.compareTo(o2.x);
+            }
+        });
+    }
+
+    private void restartAnimation() {
+        //Removes the animation and sets the variables to start another animation
         MainWindow.getMainWindow().removeUpdateListener(updateListener);
         confirmed.clear();
         recovered.clear();
@@ -199,33 +211,37 @@ public class CoronaChartApp extends MainWindow {
     }
 
     double easeInQuad(double x) {
+        //Used to ease the animation
         return x * x * x * x;
     }
 
-    public void changeDateDisplayMode(int mode) {
+    private void changeDateDisplayMode(int mode) {
+        //Changes the mode of display on the chart(day, week or month)
         for (int i = 0; i < this.confirmedList.size(); i++) {
             this.confirmedList.get(i).x.changeMode(mode);
         }
     }
 
-    public void changeSeries(int index) {
+    private void changeSeries(int index) {
+        //Changes the series, adding another value from the list.
         confirmed.add(confirmedList.get(index));
         recovered.add(recoveredList.get(index));
         deaths.add(deathsList.get(index));
 
         confirmedSeries = new CoronaChart.Series<>(confirmed);
         confirmedSeries.title = "Confirmed";
-        confirmedSeries.color = 0xf44336;
+        confirmedSeries.color = Colors.COLOR_CONFIRMED_CASES;
         recoveredSeries = new CoronaChart.Series<>(recovered);
         recoveredSeries.title = "Recovered";
-        recoveredSeries.color = 0x009688;
+        recoveredSeries.color = Colors.COLOR_RECOVERED_CASES;
         deathsSeries = new CoronaChart.Series<>(deaths);
         deathsSeries.title = "Deaths";
-        deathsSeries.color = Color.WHITE;
+        deathsSeries.color = Colors.COLOR_DEATH_CASES;
         cc.changeSeries(confirmedSeries, recoveredSeries, deathsSeries);
     }
 
     String getCoronavirusData(final String url, String httpType) {
+        //Gets the data from  RapidAPI and return it to be used as the JSON  
         String request = "";
         try {
             HttpStream.Options o = new HttpStream.Options();
@@ -245,11 +261,6 @@ public class CoronaChartApp extends MainWindow {
         }
 
         return request;
-    }
-    
-    public static class Response<T> {
-        public T data;
-        public int responseCode;
     }
 }
 

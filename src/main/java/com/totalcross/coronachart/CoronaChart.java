@@ -12,18 +12,25 @@ import totalcross.ui.gfx.Rect;
 public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Control {
 
     Series<X, Y>[] series;
-
     int yMin = 0;
-    int yMax = 8 * 1000 * 1000;
     int yStep = 1000 * 1000;
-
+    
     public CoronaChart(Series<X, Y>... series) {
         this.series = series;
     }
-
+    
     @Override
     public void onPaint(Graphics g) {
         final int borderGap = 10;
+        int yMaxValue = 0;
+        if(series[0].data.size() > 0) {
+            for (Series<X,Y> series2 : series) {
+                int value = series2.data.get(series2.data.size() -1).y.intValue();
+                if (yMaxValue < value)
+                    yMaxValue = value;
+            }
+        }
+        int yMax = ((yMaxValue / yStep) + 2) * yStep;
         super.onPaint(g);
 
         g.foreColor = Color.interpolateA(0x869699, this.backColor, 65);
@@ -55,32 +62,17 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                     g.drawText(Convert.toCurrencyString(s, 0), r.width - 1 - yTextLen, yPos - this.fmH / 2);
                 }
                 g.foreColor = 0xc5cbce;
-                g.drawLine(r.width - 1 - yTextLen - yGap, r.y + 1, r.width - 1 - yTextLen - yGap,
-                        r.height - xTextHeight - 1);
+                g.drawLine(r.width - 1 - yTextLen - yGap,
+                            r.y + 1,
+                            r.width - 1 - yTextLen - yGap,
+                            r.height - xTextHeight - 1);
 
                 // x axis
                 g.drawLine(r.x + 1, r.height - xTextHeight - 1, r.width - 1 - yTextLen - yGap,
                         r.height - xTextHeight - 1);
                 int widthX = r.width - 1 - yTextLen - yGap;
                 int part = widthX / nPoints;
-                // int part2 = widthX / (nPoints / 2);
                 int xPos = r.x + 1;
-                //int l2 = (int) (Math.log10(nPoints) / Math.log10(2));
-                // part = widthX;
-                // try {
-                // for (int i = 0; i < l2; i++) {
-                // part = BigDecimal.valueOf(part).divide(BigDecimal.valueOf(2), 0,
-                // BigDecimal.ROUND_HALF_EVEN)
-                // .intValue();
-                // }
-                // part = BigDecimal.valueOf(widthX).divide(BigDecimal.valueOf(nPoints), 0,
-                // BigDecimal.ROUND_HALF_EVEN)
-                // .intValue();
-                // } catch (ArithmeticException | IllegalArgumentException |
-                // InvalidNumberException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
 
                 int[] xPoints = new int[nPoints];
                 int[] yPoints = new int[nPoints];
@@ -89,7 +81,6 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
 
                     // x
                     xPos = r.x + 1 + i * part;
-                    // if (i % 9 == 0) { 
 
                     String s = series.x.toString();
                     if (s != null) {
@@ -99,13 +90,12 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                         g.foreColor = Color.interpolateA(0x869699, this.backColor, 65);
                         g.drawLine(xPos, r.y + 1, xPos, r.height - 52 - 1);
                     }
-                    // }
 
+                    int h = r.height - 52 - 1 - r.y - 1;
+                    double percentage = 1.0*series.y.intValue()/(yMax - yMin + yStep);
                     int yPos = r.height - 52 - 1 - yPart - (int) Math.round(
-                            ((double) series.y.intValue() * (double) (r.height - 52 - 1) / (double) (yMax - yMin)));
+                            (h * percentage));
 
-                    // g.backColor = Color.RED;
-                    // g.drawCircle(xPos, yPos, 3);
 
                     xPoints[i] = xPos;
                     yPoints[i] = yPos;

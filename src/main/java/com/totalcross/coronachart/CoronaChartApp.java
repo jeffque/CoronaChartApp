@@ -52,7 +52,7 @@ public class CoronaChartApp extends MainWindow {
     List<Data<MyDate, Integer>> deathsList = new ArrayList<>();
     public static Date firstDay;
     JSONObject response;
-    String secretKey = "898b480757msh67af669ddad21f7p15e7d1jsn7999b633b6cd";
+    String secretKey = "<YOUR KEY FROM RAPIDAPI HERE>";
 
     UpdateListener updateListener = new UpdateListener() {
 

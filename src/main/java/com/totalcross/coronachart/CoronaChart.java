@@ -14,19 +14,19 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
     Series<X, Y>[] series;
     int yMin = 0;
     int yStep = 1000 * 1000;
-    
+
     public CoronaChart(Series<X, Y>... series) {
         this.series = series;
     }
-    
+
     @Override
     public void onPaint(Graphics g) {
         final int borderGap = 10;
-        //Getting scale on y Axis
+        // Getting scale on y Axis
         int yMaxValue = 0;
-        if(series[0].data.size() > 0) { 
-            for (Series<X,Y> series2 : series) {
-                int value = series2.data.get(series2.data.size() -1).y.intValue();
+        if (series[0].data.size() > 0) {
+            for (Series<X, Y> series2 : series) {
+                int value = series2.data.get(series2.data.size() - 1).y.intValue();
                 if (yMaxValue < value)
                     yMaxValue = value;
             }
@@ -63,10 +63,8 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                     g.drawText(Convert.toCurrencyString(s, 0), r.width - 1 - yTextLen, yPos - this.fmH / 2);
                 }
                 g.foreColor = 0xc5cbce;
-                g.drawLine(r.width - 1 - yTextLen - yGap,
-                            r.y + 1,
-                            r.width - 1 - yTextLen - yGap,
-                            r.height - xTextHeight - 1);
+                g.drawLine(r.width - 1 - yTextLen - yGap, r.y + 1, r.width - 1 - yTextLen - yGap,
+                        r.height - xTextHeight - 1);
 
                 // x axis
                 g.drawLine(r.x + 1, r.height - xTextHeight - 1, r.width - 1 - yTextLen - yGap,
@@ -93,10 +91,8 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
                     }
 
                     int h = r.height - xTextHeight - 1 - r.y - 1;
-                    double percentage = 1.0*series.y.intValue()/(yMax - yMin + yStep);
-                    int yPos = r.height - xTextHeight - 1 - yPart - (int) Math.round(
-                            (h * percentage));
-
+                    double percentage = 1.0 * series.y.intValue() / (yMax - yMin + yStep);
+                    int yPos = r.height - xTextHeight - 1 - yPart - (int) Math.round((h * percentage));
 
                     xPoints[i] = xPos;
                     yPoints[i] = yPos;
@@ -127,7 +123,7 @@ public class CoronaChart<X extends Comparable<X>, Y extends Number> extends Cont
         }
         for (int i = 0; i < series.length; i++) {
             Series<X, Y> series2 = series[i];
-            if(series2.data.size() > 0) {
+            if (series2.data.size() > 0) {
                 g.foreColor = Color.WHITE;
                 String texto = series2.title;
                 g.drawText(texto, r.x + 10, r.y + 6 + (i * this.fmH));

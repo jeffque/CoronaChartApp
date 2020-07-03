@@ -18,7 +18,9 @@ import totalcross.net.URI;
 import totalcross.net.ssl.SSLSocketFactory;
 import totalcross.sys.Convert;
 import totalcross.sys.Settings;
+import totalcross.sys.Vm;
 import totalcross.ui.Button;
+import totalcross.ui.Check;
 import totalcross.ui.Label;
 import totalcross.ui.MainWindow;
 import totalcross.ui.event.UpdateListener;
@@ -29,6 +31,7 @@ import totalcross.util.InvalidDateException;
 
 public class CoronaChartApp extends MainWindow {
 
+    Check offlineCheck = new Check("Offline Data");
     final static int ANIMATION_TIME = 5000;
     int currentAnimationTime = 0;
     int nextStopTime = 0;
@@ -49,12 +52,13 @@ public class CoronaChartApp extends MainWindow {
     List<Data<MyDate, Integer>> deathsList = new ArrayList<>();
     public static Date firstDay;
     JSONObject response;
+    String secretKey = "898b480757msh67af669ddad21f7p15e7d1jsn7999b633b6cd";
 
     UpdateListener updateListener = new UpdateListener() {
 
         @Override
         public void updateListenerTriggered(int elapsedMilliseconds) {
-            //Calculates when to update the screen for the animation
+            // Calculates when to update the screen for the animation
             if (currentAnimationTime != 0) {
                 currentAnimationTime += elapsedMilliseconds;
             } else {
@@ -86,23 +90,24 @@ public class CoronaChartApp extends MainWindow {
             }
         }
     };
-    
+
     public CoronaChartApp() {
         setUIStyle(Settings.MATERIAL_UI);
-        //Filling the lists with confirmed, recovered and death cases   
+        // Filling the lists with confirmed, recovered and death cases
         fillData();
     }
 
     @Override
     public void initUI() {
         this.backColor = 0x131722;
-        //Adding components do UI
+        // Adding components do UI
         Label lblTitle = new Label("Coronavirus (COVID-19) charts and stats", CENTER);
         lblTitle.setForeColor(Color.WHITE);
         lblTitle.setFont(Font.getFont(true, 36));
         add(lblTitle, LEFT, TOP + this.fmH, FILL, PREFERRED);
+
         Button btnStartStop = new Button("Start");
-        //Adding the listener to start or stop the animation
+        // Adding the listener to start or stop the animation
         btnStartStop.addPressListener(e -> {
             if (btnStartStop.getText().equals("Start")) {
                 restartAnimation();
@@ -130,12 +135,14 @@ public class CoronaChartApp extends MainWindow {
         });
 
         add(btnStartStop, LEFT + this.fmH, AFTER + this.fmH);
+        offlineCheck.setBackForeColors(this.backColor, Color.WHITE);
+        add(offlineCheck, AFTER + this.fmH, CENTER_OF);
         add(btnMonth, RIGHT - this.fmH, SAME);
         add(btnWeek, BEFORE - this.fmH, SAME);
         add(btnDay, BEFORE - this.fmH, SAME);
 
         try {
-            //Setting the first CoronaChart
+            // Setting the first CoronaChart
             MyDate.firstDay = confirmedList.get(0).x.toDate();
             confirmed.add(confirmedList.get(index));
             recovered.add(recoveredList.get(index));
@@ -159,9 +166,17 @@ public class CoronaChartApp extends MainWindow {
     }
 
     private void fillData() {
-        //Getting the information and filling the lists used to fill the CoronaChart
-        String request = getCoronavirusData("https://coronavirus-map.p.rapidapi.com/v1/summary/latest", HttpStream.GET);
-        response = new JSONObject(request);
+
+        confirmedList.clear();
+        recoveredList.clear();
+        deathsList.clear();
+
+        // Getting the information and filling the lists used to fill the CoronaChart
+        if (!offlineCheck.isChecked())
+            response = getCoronavirusData("https://coronavirus-map.p.rapidapi.com/v1/summary/latest", HttpStream.GET);
+        else
+            response = new JSONObject(new String(Vm.getFile("request.json")));
+
         JSONObject data = response.getJSONObject("data");
         dates = data.names();
         array = data.toJSONArray(dates);
@@ -174,7 +189,7 @@ public class CoronaChartApp extends MainWindow {
             deathsList.add(new Data<MyDate, Integer>(myDate, item.getInt("deaths")));
         }
 
-        //Sorts the data by date;
+        // Sorts the data by date;
         Collections.sort(confirmedList, new Comparator<Data<MyDate, Integer>>() {
 
             @Override
@@ -199,7 +214,9 @@ public class CoronaChartApp extends MainWindow {
     }
 
     private void restartAnimation() {
-        //Removes the animation and sets the variables to start another animation
+        // Filling the lists with confirmed, recovered and death cases
+        fillData();
+        // Removes the animation and sets the variables to start another animation
         MainWindow.getMainWindow().removeUpdateListener(updateListener);
         confirmed.clear();
         recovered.clear();
@@ -211,19 +228,19 @@ public class CoronaChartApp extends MainWindow {
     }
 
     double easeInQuad(double x) {
-        //Used to ease the animation
+        // Used to ease the animation
         return x * x * x * x;
     }
 
     private void changeDateDisplayMode(int mode) {
-        //Changes the mode of display on the chart(day, week or month)
+        // Changes the mode of display on the chart(day, week or month)
         for (int i = 0; i < this.confirmedList.size(); i++) {
             this.confirmedList.get(i).x.changeMode(mode);
         }
     }
 
     private void changeSeries(int index) {
-        //Changes the series, adding another value from the list.
+        // Changes the series, adding another value from the list.
         confirmed.add(confirmedList.get(index));
         recovered.add(recoveredList.get(index));
         deaths.add(deathsList.get(index));
@@ -240,27 +257,26 @@ public class CoronaChartApp extends MainWindow {
         cc.changeSeries(confirmedSeries, recoveredSeries, deathsSeries);
     }
 
-    String getCoronavirusData(final String url, String httpType) {
-        //Gets the data from  RapidAPI and return it to be used as the JSON  
+    JSONObject getCoronavirusData(final String url, String httpType) {
+        // Gets the data from RapidAPI and return it to be used as the JSON
         String request = "";
         try {
             HttpStream.Options o = new HttpStream.Options();
             o.readTimeOut = 5000;
             o.socketFactory = new SSLSocketFactory();
             o.requestHeaders.put("x-rapidapi-host", "coronavirus-map.p.rapidapi.com");
-            o.requestHeaders.put("x-rapidapi-key",
-            "898b480757msh67af669ddad21f7p15e7d1jsn7999b633b6cd");
+            o.requestHeaders.put("x-rapidapi-key", secretKey);
             HttpStream hs = new HttpStream(new URI("https://coronavirus-map.p.rapidapi.com/v1/spots/summary"), o);
             ByteArrayStream bas = new ByteArrayStream(4096);
             bas.readFully(hs, 10, 4096);
             hs.close();
-            String string = new String(bas.getBuffer(), 0,bas.available());
+            String string = new String(bas.getBuffer(), 0, bas.available());
             request = string;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return request;
+        return new JSONObject(request);
     }
 }
 
@@ -289,7 +305,7 @@ class MyDate implements Comparable<MyDate> {
 
     public void changeMode(int mode) {
         MyDate.mode = mode;
-        switch(mode) {
+        switch (mode) {
             case DAY:
                 if (this.day == 1) {
                     s = Date.monthNames[this.month].substring(0, 3);
@@ -298,30 +314,30 @@ class MyDate implements Comparable<MyDate> {
                 } else {
                     s = null;
                 }
-            break;
+                break;
             case MONTH:
-                if(this.toDate().equals(firstDay) || this.day == 1) {
+                if (this.toDate().equals(firstDay) || this.day == 1) {
                     s = Date.monthNames[this.month].substring(0, 3);
                 } else {
                     s = null;
                 }
-            break;
+                break;
             case WEEK:
-                if(exactlyXWeeksSinceDate(MyDate.firstDay)){
+                if (exactlyXWeeksSinceDate(MyDate.firstDay)) {
                     s = weeksSinceDate(MyDate.firstDay);
                 } else {
                     s = null;
                 }
-            break;
-        } 
+                break;
+        }
     }
 
     public String weeksSinceDate(Date date) {
-        return date != null ? Integer.toString(date.subtract(this.toDate())/7) : null;
+        return date != null ? Integer.toString(date.subtract(this.toDate()) / 7) : null;
     }
 
     public boolean exactlyXWeeksSinceDate(Date date) {
-        return date != null ? date.subtract(this.toDate())%7 == 0 : false;
+        return date != null ? date.subtract(this.toDate()) % 7 == 0 : false;
     }
 
     public int compareTo(MyDate o) {
@@ -345,4 +361,3 @@ class MyDate implements Comparable<MyDate> {
     }
 
 }
-

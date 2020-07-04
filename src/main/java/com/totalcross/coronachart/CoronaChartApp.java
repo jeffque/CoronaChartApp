@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.totalcross.coronachart.CoronaChart.Data;
 import com.totalcross.coronachart.util.Colors;
@@ -118,28 +119,21 @@ public class CoronaChartApp extends MainWindow {
             }
         });
 
-        Button btnDay = new Button("Day");
-        btnDay.addPressListener(e -> {
-            changeDateDisplayMode(MyDate.DAY);
-            restartAnimation();
-        });
-        Button btnWeek = new Button("Week");
-        btnWeek.addPressListener(e -> {
-            changeDateDisplayMode(MyDate.WEEK);
-            restartAnimation();
-        });
-        Button btnMonth = new Button("Month");
-        btnMonth.addPressListener(e -> {
-            changeDateDisplayMode(MyDate.MONTH);
-            restartAnimation();
-        });
+        BiFunction<String, Integer, Button> animationBtnFactory = (typeName, type) -> {
+        	Button btn = new Button(typeName);
+        	btn.addPressListener(e -> {
+        		changeDateDisplayMode(type);
+                restartAnimation();
+        	});
+        	return btn;
+        };
 
         add(btnStartStop, LEFT + this.fmH, AFTER + this.fmH);
         offlineCheck.setBackForeColors(this.backColor, Color.WHITE);
         add(offlineCheck, AFTER + this.fmH, CENTER_OF);
-        add(btnMonth, RIGHT - this.fmH, SAME);
-        add(btnWeek, BEFORE - this.fmH, SAME);
-        add(btnDay, BEFORE - this.fmH, SAME);
+        add(animationBtnFactory.apply("Month", MyDate.MONTH), RIGHT - this.fmH, SAME);
+        add(animationBtnFactory.apply("Week", MyDate.WEEK), BEFORE - this.fmH, SAME);
+        add(animationBtnFactory.apply("Day", MyDate.DAY), BEFORE - this.fmH, SAME);
 
         try {
             // Setting the first CoronaChart

@@ -184,27 +184,10 @@ public class CoronaChartApp extends MainWindow {
         }
 
         // Sorts the data by date;
-        Collections.sort(confirmedList, new Comparator<Data<MyDate, Integer>>() {
-
-            @Override
-            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                return o1.x.compareTo(o2.x);
-            }
-        });
-        Collections.sort(recoveredList, new Comparator<Data<MyDate, Integer>>() {
-
-            @Override
-            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                return o1.x.compareTo(o2.x);
-            }
-        });
-        Collections.sort(deathsList, new Comparator<Data<MyDate, Integer>>() {
-
-            @Override
-            public int compare(Data<MyDate, Integer> o1, Data<MyDate, Integer> o2) {
-                return o1.x.compareTo(o2.x);
-            }
-        });
+        Comparator<Data<MyDate, Integer>> dataComparator = (o1, o2) -> o1.x.compareTo(o2.x);
+        Collections.sort(confirmedList, dataComparator);
+        Collections.sort(recoveredList, dataComparator);
+        Collections.sort(deathsList, dataComparator);
     }
 
     private void restartAnimation() {

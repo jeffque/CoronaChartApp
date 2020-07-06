@@ -120,12 +120,12 @@ public class CoronaChartApp extends MainWindow {
         });
 
         BiFunction<String, Integer, Button> animationBtnFactory = (typeName, type) -> {
-        	Button btn = new Button(typeName);
-        	btn.addPressListener(e -> {
-        		changeDateDisplayMode(type);
+            Button btn = new Button(typeName);
+            btn.addPressListener(e -> {
+                changeDateDisplayMode(type);
                 restartAnimation();
-        	});
-        	return btn;
+            });
+            return btn;
         };
 
         add(btnStartStop, LEFT + this.fmH, AFTER + this.fmH);
